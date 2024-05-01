@@ -182,6 +182,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DownloadPlaylist.cs" />
+    <Compile Include="DownloadVideo.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
