@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using VideoLibrary;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+using static YoutubeVideoDownloader.DownloadVideo;
 
 namespace YoutubeVideoDownloader
 {
@@ -55,37 +56,29 @@ namespace YoutubeVideoDownloader
             btnDownload.Enabled = !active;
             choosePathDialog.Enabled = !active;
             comboBoxOptions.Enabled = !active;
-            downloadProgressBar.Visible = active;
         }
 
         private IProgress<int> progress;
         private async void btnDownload_Click(object sender, EventArgs e)
         {
             downloadingActive(true);
-
-            var youtube = YouTube.Default;
+            lblMessage.Text = "Downloading...";
             int option = comboBoxOptions.SelectedIndex;
 
-            progress = new Progress<int>(value =>
-            {
-                downloadProgressBar.Value = value;
-            });
-
             try
-            {
-                lblMessage.Text = "Downloading...";
+            {   
+                progress = new Progress<int>(value =>
+                {
+                    downloadProgressBar.Invoke((MethodInvoker)(() => downloadProgressBar.Value = value));
+                });
+                
                 switch (option)
                 {
                     case 0:
-                        var video = await Task.Run(() => youtube.GetVideo(txtBoxLink.Text));
-                        await DownloadWithProgress(video, progress);
+                        await Task.Run(() => DownloadVideoAsync(txtBoxLink.Text, downloadPath, progress));
                         break;
                     case 1:
-                        var videos = await Task.Run(() => youtube.GetAllVideos(txtBoxLink.Text));
-                        foreach (var v in videos)
-                        {
-                            await DownloadWithProgress(v, progress);
-                        }
+                        await Task.Run(() => DownloadPlaylist.DownloadPlaylistAsync(txtBoxLink.Text, downloadPath, progress));
                         break;
                     default:
                         lblMessage.Invoke((MethodInvoker)(() => lblMessage.Text = "Invalid Option"));
@@ -104,29 +97,6 @@ namespace YoutubeVideoDownloader
             finally
             {
                 downloadingActive(false);
-            }
-        }
-
-        private async Task DownloadWithProgress(Video video, IProgress<int> progress)
-        {
-            const int bufferSize = 1024 * 1024; // 1MB
-            var totalBytes = video.GetBytes().Length;
-            var buffer = new byte[bufferSize];
-            var bytesRead = 0;
-            var bytesWritten = 0;
-
-            using (var fileStream = new FileStream(Path.Combine(downloadPath, video.FullName), FileMode.Create, FileAccess.Write))
-            {
-                using (var memoryStream = new MemoryStream(video.GetBytes()))
-                {
-                    while ((bytesRead = await memoryStream.ReadAsync(buffer, 0, bufferSize)) > 0)
-                    {
-                        await fileStream.WriteAsync(buffer, 0, bytesRead);
-                        bytesWritten += bytesRead;
-                        var progressPercentage = (int)((bytesWritten / (double)totalBytes) * 100);
-                        progress.Report(progressPercentage);
-                    }
-                }
             }
         }
     }
