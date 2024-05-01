@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using VideoLibrary;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-using static YoutubeVideoDownloader.DownloadVideo;
 
 namespace YoutubeVideoDownloader
 {
@@ -40,6 +31,7 @@ namespace YoutubeVideoDownloader
         private void MainForm_Load(object sender, EventArgs e)
         {
             comboBoxOptions.SelectedIndex = 0;
+            comBoxFileType.SelectedIndex = 0;
             if (File.Exists("path.txt"))
             {
                 downloadPath = File.ReadAllText("path.txt");
@@ -56,43 +48,44 @@ namespace YoutubeVideoDownloader
             btnDownload.Enabled = !active;
             choosePathDialog.Enabled = !active;
             comboBoxOptions.Enabled = !active;
+            comBoxFileType.Enabled = !active;
+            comBoxQuality.Enabled = !active;
         }
 
         private IProgress<int> progress;
         private async void btnDownload_Click(object sender, EventArgs e)
         {
             downloadingActive(true);
-            lblMessage.Text = "Downloading...";
+            lblMessage.Text = "Status: Downloading...";
             int option = comboBoxOptions.SelectedIndex;
 
             try
             {   
                 progress = new Progress<int>(value =>
                 {
-                    downloadProgressBar.Invoke((MethodInvoker)(() => downloadProgressBar.Value = value));
+                   downloadProgressBar.Value = value;
                 });
                 
                 switch (option)
                 {
                     case 0:
-                        await Task.Run(() => DownloadVideoAsync(txtBoxLink.Text, downloadPath, progress));
+                        await Task.Run(() => DownloadVideo.DownloadVideoAsync(txtBoxLink.Text, downloadPath, progress));
                         break;
                     case 1:
                         await Task.Run(() => DownloadPlaylist.DownloadPlaylistAsync(txtBoxLink.Text, downloadPath, progress));
                         break;
                     default:
-                        lblMessage.Invoke((MethodInvoker)(() => lblMessage.Text = "Invalid Option"));
+                        lblMessage.Text = "Status: Invalid Option";
                         break;
                 }
 
-                lblMessage.Visible = true;
-                lblMessage.Text = "Downloaded Successfully";
+                lblMessage.Text = " Status: Downloaded Successfully";
 
             }
             catch (Exception ex)
             {
                 lblMessage.Visible = true;
-                lblMessage.Text = "Error: " + ex.Message;
+                lblMessage.Text = "Status: Error " + ex.Message;
             }
             finally
             {

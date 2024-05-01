@@ -107,13 +107,13 @@
             // 
             // lblMessage
             // 
-            this.lblMessage.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMessage.Location = new System.Drawing.Point(383, 199);
+            this.lblMessage.Font = new System.Drawing.Font("Segoe UI", 11.35F, System.Drawing.FontStyle.Bold);
+            this.lblMessage.Location = new System.Drawing.Point(356, 199);
             this.lblMessage.Name = "lblMessage";
-            this.lblMessage.Size = new System.Drawing.Size(324, 23);
+            this.lblMessage.Size = new System.Drawing.Size(351, 28);
             this.lblMessage.TabIndex = 6;
-            this.lblMessage.Text = "Error: Idk somethin wrong";
-            this.lblMessage.Visible = false;
+            this.lblMessage.Text = "Status: Waiting for input...";
+            this.lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // comboBoxOptions
             // 
@@ -219,6 +219,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
             this.ClientSize = new System.Drawing.Size(719, 236);
             this.Controls.Add(this.comBoxQuality);
             this.Controls.Add(this.label8);
@@ -237,8 +238,11 @@
             this.Controls.Add(this.choosePathDialog);
             this.Controls.Add(this.lblDownloadPath);
             this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Youtube Video Downloader";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);

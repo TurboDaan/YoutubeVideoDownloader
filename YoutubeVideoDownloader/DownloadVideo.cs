@@ -18,24 +18,40 @@ namespace YoutubeVideoDownloader
             const int bufferSize = 1024 * 1024; // 1MB
             var totalBytes = video.GetBytes().Length;
             var buffer = new byte[bufferSize];
-            var bytesRead = 0;
             var bytesWritten = 0;
 
-            using (var fileStream = new FileStream(Path.Combine(downloadPath, video.FullName), FileMode.Create, FileAccess.Write))
+            // Start progress reporting in a separate task
+            await Task.Run(async () =>
             {
                 using (var memoryStream = new MemoryStream(video.GetBytes()))
                 {
-                    while ((bytesRead = await memoryStream.ReadAsync(buffer, 0, bufferSize)) > 0)
+                    while (bytesWritten < totalBytes)
                     {
-                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+                        var bytesRead = await memoryStream.ReadAsync(buffer, 0, bufferSize);
+                        if (bytesRead == 0) break;
+
                         bytesWritten += bytesRead;
                         var progressPercentage = (int)((bytesWritten / (double)totalBytes) * 100);
                         progress.Report(progressPercentage);
                     }
                 }
+            });
+
+            // Write to file
+            using (var fileStream = new FileStream(Path.Combine(downloadPath, video.FullName), FileMode.Create, FileAccess.Write))
+            {
+                using (var memoryStream = new MemoryStream(video.GetBytes()))
+                {
+                    while (bytesWritten < totalBytes)
+                    {
+                        var bytesRead = await memoryStream.ReadAsync(buffer, 0, bufferSize);
+                        if (bytesRead == 0) break;
+
+                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+                        bytesWritten += bytesRead;
+                    }
+                }
             }
         }
-        
     }
 }
-
